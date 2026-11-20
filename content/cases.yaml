@@ -1,0 +1,24 @@
+# ЗАГЛУШКИ. Заменить на реальных учеников (с их согласия): имя, фото, результаты.
+# Пока у записи стоит placeholder: true, на сайте она помечена как «Пример карточки».
+# Записей должно быть 2 или 3.
+- name: "Имя Фамилия"
+  photo: ""                  # например "/img/cases/name.jpg"; пусто — инициалы
+  result_before: "3:07:40"
+  result_after: "2:58:15"
+  year: 2025
+  note: "Короткая цитата или комментарий (необязательно)"
+  placeholder: true
+- name: "Имя Фамилия"
+  photo: ""
+  result_before: "4:12:05"
+  result_after: "3:49:30"
+  year: 2025
+  note: ""
+  placeholder: true
+- name: "Имя Фамилия"
+  photo: ""
+  result_before: "4:58:20"
+  result_after: "4:29:10"
+  year: 2025
+  note: ""
+  placeholder: true

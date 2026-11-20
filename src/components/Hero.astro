@@ -1,0 +1,24 @@
+---
+import { dateLong, money, plural } from '../lib/format.mjs';
+const { config, today, race, finished, stepIdx, buyUrl } = Astro.props;
+const left = race - today;
+const price = config.price_ladder[stepIdx].price;
+const daysText = finished ? 'Марафон прошёл' : left === 0 ? 'Старт сегодня' : `До старта ${left} ${plural(left, 'день', 'дня', 'дней')}`;
+---
+<section class="hero hero--photo" data-enter data-calm="top" aria-labelledby="hero-h">
+  <img class="hero__bg" src="/img/hero-1200.webp"
+    srcset="/img/hero-560.webp 560w, /img/hero-800.webp 800w, /img/hero-1200.webp 1200w, /img/hero-1672.webp 1672w"
+    sizes="100vw" width="1672" height="941" fetchpriority="high" decoding="async"
+    alt="Карандашный рисунок: марафонцы в цветных майках бегут по набережной Казанки, за рекой Казанский кремль и мечеть Кул-Шариф"
+    style="--ly-pos: 50% 62%; --ly-pos-phone: 58% 50%">
+  <div class="wrap"><div class="hero-text">
+    <div class="hero__text">
+      <h1 id="hero-h">{config.race_name}, {dateLong(config.race_date).replace(/ (\d{4})$/, ' $1')}</h1>
+      <p class="hero__lead">Авторский план Юрия Строфилова и платформа S10.run с живыми тренерами.</p>
+      <p class="hero-stats"><strong data-countdown>{daysText}</strong>. План сейчас стоит <strong><span data-price>{money(price)}</span>&nbsp;{config.currency}</strong>.</p>
+      <div class="btn-row">
+        <a class="btn btn--primary" href={buyUrl} data-s10 data-goal="buy_click" data-block="hero">Начать подготовку<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
+      </div>
+    </div>
+  </div></div>
+</section>

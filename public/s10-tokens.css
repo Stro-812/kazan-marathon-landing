@@ -1,0 +1,31 @@
+/* Токены стиля S10.run (S10_visual_style.md), цвета сняты с живого https://s10.run/dashboard 20.11.2026.
+   Единственное место с цветами сайта: компоненты берут только эти переменные. */
+:root {
+  --s10-primary: #004AAD;        /* шапка, кнопки, ссылки, активные элементы */
+  --s10-primary-hover: #003A8A;
+  --s10-primary-soft: #E9E9FF;   /* подложка выделенного */
+  --s10-coral: #FF6259;          /* вторичный акцент: метки, события */
+  --s10-coral-ink: #B3261E;      /* коралловый текст на светлом (контраст AA) */
+  --s10-coral-soft: #FFEEEE;
+  --s10-success: #64C504;        /* прогресс, полосы */
+  --s10-success-ink: #2E7D32;    /* зелёный текст */
+  --s10-success-soft: #EBFFF5;
+  --s10-warn-ink: #8A4B00;       /* повторные отрезки: оранжевый с дашборда, затемнён для текста */
+  --s10-warn-soft: #FFF6E0;
+  --s10-background: #FFFFFF;
+  --s10-surface: #FFFFFF;
+  --s10-on-primary: #FFFFFF;     /* текст на синем */
+  --s10-on-primary-muted: #D6DDF5;
+  --s10-surface-alt: #F4F4FF;
+  --s10-text: #212121;
+  --s10-text-muted: #666666;
+  --s10-border: #E3E5EE;
+  --s10-danger: #D94E52;
+
+  --s10-radius-sm: 4px;
+  --s10-radius-md: 6px;
+  --s10-radius-lg: 8px;
+  --s10-radius-pill: 999px;
+  --s10-shadow-card: 0 2px 12px rgba(0, 40, 100, 0.06);
+  --s10-shadow-hover: 0 6px 20px rgba(0, 40, 100, 0.10);
+}

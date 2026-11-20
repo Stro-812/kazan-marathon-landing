@@ -1,0 +1,22 @@
+---
+const { faq } = Astro.props;
+const anyPlaceholder = faq.some(q => q.placeholder);
+---
+<section class="section" id="faq" aria-labelledby="faq-h">
+  <div class="wrap">
+    <div class="grid grid--top">
+      <div class="span-5 section-head">
+        <h2 id="faq-h">Частые вопросы</h2>
+        {anyPlaceholder && <p class="draft-note" data-draft>Заглушка: ответы нужно заполнить в content/faq.yaml.</p>}
+      </div>
+      <div class="span-6 start-7 qa">
+        {faq.map((q, i) => (
+          <details class="qa__item" data-goal="faq_open" data-question={q.question}>
+            <summary><span>{q.question}</span><svg class="qa__icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+            <p>{q.answer}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,84 @@
+---
+// Тренировки плана (раздел 4 ТЗ). Все 24 недели отдаются в HTML (для поисковиков);
+// скрипт на клиенте убирает прошедшие недели и открывает текущую по МСК.
+import { dateRange, dateLong, km } from '../lib/format.mjs';
+const { config, weeks, currentWeek, finished, today, week1 } = Astro.props;
+const total = config.plan_weeks;
+const DAY = { 'пн': 'Понедельник', 'вт': 'Вторник', 'ср': 'Среда', 'чт': 'Четверг', 'пт': 'Пятница', 'сб': 'Суббота', 'вс': 'Воскресенье' };
+const TYPE = { 'развивающая': 'tempo', 'интервальная': 'interval', 'повторная': 'reps', 'длительная': 'long', 'соревнование': 'race' };
+const cap = s => s[0].toUpperCase() + s.slice(1);
+const setText = s => s.reps > 1 ? `${s.reps} × ${km(s.rep_km)} км` : `${km(s.rep_km)} км`;
+const draft = weeks.some(w => w.draft);
+---
+<section class="section plan-section" id="plan" style="--h: 2; --hm: 2" aria-labelledby="plan-h">
+  <div class="wrap">
+    <div class="section-head section-head--row">
+      <div>
+        <h2 id="plan-h">Тренировки плана до старта</h2>
+        <p>Это то, что получит бегун, купивший план сегодня: все недели с текущей до недели марафона.</p>
+      </div>
+    </div>
+
+    <div class="plan__finished" data-plan-finished hidden={!finished}>
+      <p class="plan__finished-title">Подготовка завершена</p>
+      <p>{config.race_name} прошёл. Новости и следующий план — в Телеграме.</p>
+      <a class="btn btn--secondary" href={config.telegram_url} data-goal="telegram_click" data-block="plan">Открыть Телеграм</a>
+    </div>
+
+    <div class="plan__body" data-plan-body hidden={finished}>
+      <dl class="legend" aria-label="Обозначения темпов">
+        <div><dt>T42</dt><dd>темп марафона</dd></div>
+        <div><dt>T21</dt><dd>темп полумарафона</dd></div>
+        <div><dt>T10</dt><dd>темп 10 км</dd></div>
+        <div><dt>T5</dt><dd>темп 5 км</dd></div>
+        <div><dt>+5</dt><dd>на 5 секунд на километр медленнее</dd></div>
+      </dl>
+
+      <p class="plan__start" data-plan-start hidden={today >= week1}>Старт подготовки — {dateLong(weeks[0].start)}</p>
+      {draft && <p class="draft-note" data-draft>Черновик: недели заполнены для примера, сверить с планом в S10.run (content/weeks, поле draft).</p>}
+
+      <p class="weeks-nav__title" id="weeks-nav-title">Недели плана</p>
+      <div class="weeks-nav" role="tablist" aria-labelledby="weeks-nav-title" data-weeks-nav>
+        {weeks.map(w => (
+          <button type="button" class="weeks-nav__tab" role="tab" id={`tab-w${w.week}`} aria-controls={`week-${w.week}`}
+            aria-selected={String(w.week === currentWeek)} tabindex={w.week === currentWeek ? 0 : -1}
+            data-week={w.week} data-goal="week_open" aria-label={`Неделя ${w.week}`}>{w.week}</button>
+        ))}
+      </div>
+
+      {weeks.map(w => (
+        <article class="week" role="tabpanel" id={`week-${w.week}`} aria-labelledby={`tab-w${w.week}`} data-week={w.week} hidden={w.week !== currentWeek}>
+          <header class="week__head">
+            <h3>Неделя {w.week} из {total}<span class="week__now" data-now-badge hidden={w.week !== currentWeek || today < week1}>, текущая</span></h3>
+            <p class="week__meta"><span>{dateRange(w.start, w.end)}</span><span>Фаза: {w.phase}</span><span>Объём недели: {km(w.volume)} км</span></p>
+          </header>
+          <div class="week__workouts">
+            {w.workouts.map(t => (
+              <div class="workout">
+                <div class="workout__top">
+                  <span class="workout__day">{DAY[t.day]}</span>
+                  <span class={`type type--${TYPE[t.type]}`}>{cap(t.type)}</span>
+                </div>
+                <dl class="workout__km">
+                  {t.warmup_km > 0 && <div><dt>Разминка</dt><dd>{km(t.km.warmup)} км</dd></div>}
+                  {t.sets.map((s, j) => (
+                    <div><dt>{j ? 'Затем' : 'Отрезки'}</dt><dd>{setText(s)} <span class="pace">{s.pace}</span></dd></div>
+                  ))}
+                  {t.km.recovery > 0 && <div><dt>Восстановление</dt><dd>{km(t.km.recovery)} км</dd></div>}
+                  {t.cooldown_km > 0 && <div><dt>Заминка</dt><dd>{km(t.km.cooldown)} км</dd></div>}
+                  <div class="workout__total"><dt>Итого</dt><dd>{km(t.km.total)} км</dd></div>
+                </dl>
+                <p class="workout__pace-note">Ваши личные темпы рассчитает S10.run</p>
+                <h4>Зачем</h4>
+                <p>{t.why}</p>
+                <h4>Почему именно сейчас</h4>
+                <p>{t.why_now}</p>
+              </div>
+            ))}
+          </div>
+          <p class="week__foot">Лёгкие пробежки ({km(w.easy_km)} км) и силовые S10.run добавляет в план сам.</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

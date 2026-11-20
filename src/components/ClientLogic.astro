@@ -1,0 +1,133 @@
+---
+// Логика на клиенте по московскому времени (UTC+3): текущая неделя, видимые недели, цена, таймер,
+// обратный отсчёт, UTM-метки для ссылок на S10.run и цели Яндекс Метрики.
+// В режиме разработки (npm run dev) дату можно подменить: ?today=2027-01-11
+const { config, weeks, dev } = Astro.props;
+const C = {
+  dev: !!dev,
+  raceDate: config.race_date,
+  week1: weeks[0].start,
+  totalWeeks: weeks.length,
+  ladder: config.price_ladder,
+  utmDefault: config.utm_default || { utm_source: 'landing', utm_campaign: 'kazan2027' },
+  metrikaId: String(config.metrika_id || '').trim(),
+};
+---
+<script is:inline define:vars={{ C }}>
+(function () {
+  var MSK = 3 * 36e5, DAY = 864e5;
+  var dayNum = function (s) { return Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10)) / DAY; };
+  var plural = function (n, a, b, c) { var x = Math.abs(n) % 100, y = x % 10; return x > 10 && x < 20 ? c : y > 1 && y < 5 ? b : y === 1 ? a : c; };
+  var money = function (v) { return v.toLocaleString('ru-RU').replace(/\s/g, ' '); };
+  var $$ = function (sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); };
+  var params = new URLSearchParams(location.search);
+
+  // «Сейчас». ?today=ГГГГ-ММ-ДД работает только в режиме разработки: полдень этого дня по МСК.
+  var fake = C.dev && /^\d{4}-\d{2}-\d{2}$/.test(params.get('today') || '') ? params.get('today') : null;
+  var offset = fake ? Date.UTC(+fake.slice(0, 4), +fake.slice(5, 7) - 1, +fake.slice(8, 10), 9) - Date.now() : 0;
+  var now = function () { return Date.now() + offset; };
+  if (fake) document.documentElement.setAttribute('data-today', fake);
+
+  var today = Math.floor((now() + MSK) / DAY);
+  var race = dayNum(C.raceDate), week1 = dayNum(C.week1);
+  var finished = today > race;
+  var before = today < week1;
+  var current = before ? 1 : finished ? C.totalWeeks : Math.floor((today - week1) / 7) + 1;
+
+  // Обратный отсчёт до старта (дни)
+  var left = race - today;
+  $$('[data-countdown]').forEach(function (el) {
+    el.textContent = finished ? 'Марафон прошёл' : left === 0 ? 'Старт сегодня' : 'До старта ' + left + ' ' + plural(left, 'день', 'дня', 'дней');
+  });
+
+  // Блок «Тренировки плана»
+  var body = document.querySelector('[data-plan-body]'), fin = document.querySelector('[data-plan-finished]');
+  if (body && fin) {
+    body.hidden = finished; fin.hidden = !finished;
+    if (finished) {
+      body.remove(); // вкладки недель больше не нужны
+    } else {
+      var start = document.querySelector('[data-plan-start]');
+      if (start) start.hidden = !before;
+      $$('[data-weeks-nav] [role="tab"]').forEach(function (tab) {
+        var n = +tab.getAttribute('data-week'), on = n === current;
+        var panel = document.getElementById('week-' + n);
+        if (n < current) { tab.remove(); if (panel) panel.remove(); return; } // прошедшие недели не показываем
+        tab.setAttribute('aria-selected', String(on));
+        tab.tabIndex = on ? 0 : -1;
+        tab.classList.toggle('is-current', n === current && !before);
+        if (panel) {
+          panel.hidden = !on;
+          var badge = panel.querySelector('[data-now-badge]');
+          if (badge) badge.hidden = !(n === current && !before);
+        }
+      });
+      // текущая неделя — первой в ленте
+      var nav = document.querySelector('[data-weeks-nav]');
+      if (nav) nav.scrollLeft = 0;
+    }
+  }
+
+  // Цена и таймер до следующего повышения (смена ступени — понедельник, 00:00 МСК)
+  var stepStart = function (s) { return dayNum(s.from) * DAY - MSK; };
+  function renderPrice() {
+    var t = now(), idx = 0;
+    C.ladder.forEach(function (s, i) { if (stepStart(s) <= t) idx = i; });
+    var cur = C.ladder[idx], next = C.ladder[idx + 1];
+    $$('[data-price]').forEach(function (el) { el.textContent = money(cur.price); });
+    $$('.ladder__step').forEach(function (li, i) {
+      li.classList.toggle('is-past', i < idx);
+      li.classList.toggle('is-current', i === idx);
+      var mark = li.querySelector('.ladder__mark');
+      if (mark) { mark.textContent = i === idx ? 'сейчас' : ''; mark.setAttribute('aria-hidden', String(i !== idx)); }
+    });
+    var nb = document.querySelector('[data-next-block]'), fb = document.querySelector('[data-final-block]');
+    if (nb) nb.hidden = !next;
+    if (fb) fb.hidden = !!next;
+    if (next) {
+      var ms = Math.max(0, stepStart(next) - t);
+      var d = Math.floor(ms / DAY), h = Math.floor(ms % DAY / 36e5), m = Math.floor(ms % 36e5 / 6e4);
+      var txt = (d ? d + ' ' + plural(d, 'день', 'дня', 'дней') + ' ' : '') + h + ' ч ' + m + ' мин';
+      $$('[data-timer]').forEach(function (el) { el.textContent = txt; });
+      $$('[data-next-price]').forEach(function (el) { el.textContent = money(next.price); });
+    }
+  }
+  renderPrice();
+  setInterval(renderPrice, 30000);
+
+  // UTM: входящие utm_* пробрасываются на S10.run; если их нет — значения по умолчанию из конфига
+  var incoming = [];
+  params.forEach(function (v, k) { if (/^utm_/.test(k)) incoming.push([k, v]); });
+  $$('a[data-s10]').forEach(function (a) {
+    try {
+      var u = new URL(a.getAttribute('href'), location.href);
+      Array.from(u.searchParams.keys()).filter(function (k) { return /^utm_/.test(k); }).forEach(function (k) { u.searchParams.delete(k); });
+      if (incoming.length) incoming.forEach(function (p) { u.searchParams.set(p[0], p[1]); });
+      else Object.keys(C.utmDefault).forEach(function (k) { u.searchParams.set(k, C.utmDefault[k]); });
+      a.href = u.toString();
+    } catch (e) {}
+  });
+
+  // Яндекс Метрика: счётчик подключается, только если в конфиге указан metrika_id
+  if (C.metrikaId) {
+    (function (m, e, t, r, i, k, a) { m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments); }; m[i].l = 1 * new Date();
+      k = e.createElement(t), a = e.getElementsByTagName(t)[0]; k.async = 1; k.src = r; a.parentNode.insertBefore(k, a);
+    })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js', 'ym');
+    window.ym(+C.metrikaId, 'init', { clickmap: true, trackLinks: true, accurateTrackBounce: true });
+  }
+  function goal(name, p) {
+    if (C.metrikaId && window.ym) window.ym(+C.metrikaId, 'reachGoal', name, p);
+    else if (C.dev) console.info('[Метрика] цель', name, p || '');
+  }
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest && e.target.closest('a[data-goal], button[data-goal]');
+    if (!el) return;
+    var name = el.getAttribute('data-goal');
+    if (name === 'week_open') goal('week_open', { week: +el.getAttribute('data-week') });
+    else goal(name, { block: el.getAttribute('data-block') || '' });
+  });
+  $$('details[data-goal="faq_open"]').forEach(function (d) {
+    d.addEventListener('toggle', function () { if (d.open) goal('faq_open', { question: d.getAttribute('data-question') }); });
+  });
+})();
+</script>

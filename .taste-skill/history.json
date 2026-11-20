@@ -1,0 +1,20 @@
+{
+  "moments": [
+    {
+      "id": "word-highlight",
+      "at": "2026-11-19T22:39:31.475Z",
+      "seed": "1b8f745c"
+    }
+  ],
+  "palettes": [
+    "clay-pine"
+  ],
+  "types": [
+    "onest"
+  ],
+  "dealt": [
+    "onest",
+    "source-serif",
+    "figtree"
+  ]
+}

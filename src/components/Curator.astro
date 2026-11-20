@@ -1,0 +1,25 @@
+---
+const { config } = Astro.props;
+---
+<section class="section statement" id="coach" style="--hm: 2" data-moment="word-highlight" aria-labelledby="coach-h">
+  <div class="wrap">
+    <div class="grid grid--top coach">
+      <div class="span-6 coach__text">
+        <h2 id="coach-h" class="t-label">Куратор плана — Юрий Строфилов</h2>
+        <p class="mo-wh__text">Личный рекорд на марафоне — <strong>2:36 в 59 лет</strong>.</p>
+        <ul class="coach__facts">
+          <li>Чемпион мира на марафоне в возрастных группах 55 и 60 лет</li>
+          <li>Автор книги «Не про бег»</li>
+        </ul>
+      </div>
+      <div class="span-6 start-7">
+        {config.curator_photo
+          ? <div class="frame frame--photo coach__photo"><img class="frame__img" src={config.curator_photo}
+              srcset={config.curator_photo.endsWith('-800.webp') ? `${config.curator_photo.replace('-800.webp', '-480.webp')} 480w, ${config.curator_photo} 800w` : undefined}
+              sizes="(max-width: 1023px) 320px, 628px" alt="Юрий Строфилов, карандашный рисунок: сидит на каменном парапете у китайской беседки, в розовой шапке и тёмных очках"
+              loading="lazy" decoding="async" width="800" height="800"></div>
+          : <div class="coach__photo coach__photo--empty" role="img" aria-label="Юрий Строфилов"><!-- СЛОТ ДЛЯ ФОТО: положить файл в public/img и указать curator_photo в content/config.yaml --><span aria-hidden="true">ЮС</span></div>}
+      </div>
+    </div>
+  </div>
+</section>

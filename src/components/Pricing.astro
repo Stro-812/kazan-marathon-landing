@@ -1,0 +1,39 @@
+---
+import { money } from '../lib/format.mjs';
+const { config, stepIdx, buyUrl } = Astro.props;
+const ladder = config.price_ladder;
+const MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+const short = s => `${+s.slice(8, 10)} ${MONTHS[+s.slice(5, 7) - 1]}`;
+const cur = ladder[stepIdx], next = ladder[stepIdx + 1];
+const last = ladder[ladder.length - 1];
+---
+<section class="section" id="price" aria-labelledby="price-h">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 id="price-h">Цена плана растёт каждую неделю</h2>
+    </div>
+    <div class="grid grid--top price-split">
+      <div class="span-5 price__now">
+        <p class="t-label">Цена сейчас</p>
+        <p class="price__value"><span data-price>{money(cur.price)}</span>&nbsp;{config.currency}</p>
+        <div class="price__next" data-next-block hidden={!next}>
+          <p>Через <strong data-timer>…</strong> цена станет <strong><span data-next-price>{next ? money(next.price) : ''}</span>&nbsp;{config.currency}</strong></p>
+        </div>
+        <p class="price__final" data-final-block hidden={!!next}>{money(last.price)}&nbsp;{config.currency} до старта</p>
+        <p class="price__fix">Цена фиксируется в момент оплаты.</p>
+        <div class="btn-row">
+          <a class="btn btn--primary" href={buyUrl} data-s10 data-goal="buy_click" data-block="price">Начать подготовку<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
+        </div>
+      </div>
+      <ol class="span-6 start-7 ladder" aria-label="Ступени цены">
+        {ladder.map((s, i) => (
+          <li class:list={['ladder__step', { 'is-past': i < stepIdx, 'is-current': i === stepIdx }]} data-step={i} data-from={s.from}>
+            <span class="ladder__date">{i === ladder.length - 1 ? `с ${short(s.from)} до старта` : `с ${short(s.from)}`}</span>
+            <span class="ladder__price">{money(s.price)}&nbsp;{config.currency}</span>
+            <span class="ladder__mark" aria-hidden={i !== stepIdx}>{i === stepIdx ? 'сейчас' : ''}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,31 @@
+---
+// Кейсы (раздел 3.4 ТЗ): 2 карточки — две колонки, 3 — три.
+const { cases, config } = Astro.props;
+const initials = n => n.split(/\s+/).map(p => p[0]).join('').slice(0, 2).toUpperCase();
+const anyPlaceholder = cases.some(c => c.placeholder);
+---
+<section class="section" id="cases" style="--hm: 2" aria-labelledby="cases-h">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 id="cases-h">Результаты учеников на марафонах</h2>
+    </div>
+    {anyPlaceholder && <p class="draft-note" data-draft>Заглушка: карточки ниже — шаблон. Реальных учеников и их результаты нужно внести в content/cases.yaml.</p>}
+    <div class={`cases cases--${cases.length}`}>
+      {cases.map(c => (
+        <article class="card case" data-placeholder={c.placeholder ? '' : undefined}>
+          <div class="case__who">
+            {c.photo
+              ? <img class="case__photo" src={c.photo} alt={c.name} width="56" height="56" loading="lazy">
+              : <span class="case__photo case__photo--empty" aria-hidden="true">{initials(c.name)}</span>}
+            <div><h3>{c.name}</h3><p class="case__year">{config.race_name}, {c.year}</p></div>
+          </div>
+          <dl class="case__results">
+            <div><dt>Было</dt><dd>{c.result_before}</dd></div>
+            <div><dt>Стало</dt><dd class="case__after">{c.result_after}</dd></div>
+          </dl>
+          {c.note && <p class="case__note">{c.note}</p>}
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

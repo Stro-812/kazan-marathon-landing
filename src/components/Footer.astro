@@ -1,0 +1,23 @@
+---
+import { money } from '../lib/format.mjs';
+const { config, buyUrl, offerUrl, privacyUrl, stepIdx } = Astro.props;
+---
+<footer class="footer closing footer--dark ground-inverse" id="contact" aria-labelledby="close-h">
+  <div class="wrap">
+    <div class="closing__cta close--type">
+      <div class="section-head">
+        <h2 id="close-h">Начните подготовку к марафону сегодня</h2>
+        <p>Сейчас план стоит <span data-price>{money(config.price_ladder[stepIdx].price)}</span>&nbsp;{config.currency}. Оплата, анкета и расчёт темпов — на S10.run.</p>
+      </div>
+      <a class="btn btn--primary btn--xl" href={buyUrl} data-s10 data-goal="buy_click" data-block="footer">Начать подготовку<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
+    </div>
+    <div class="closing__links">
+      <div class="footer__legal">
+        <span>© S10.run</span>
+        <a href={offerUrl} data-s10>Оферта</a>
+        <a href={privacyUrl} data-s10>Политика конфиденциальности</a>
+        <a href={config.telegram_url} data-goal="telegram_click" data-block="footer">Телеграм</a>
+      </div>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,19 @@
+# Вопросы и ответы. ЗАГЛУШКИ в ответах: заполнить, затем убрать placeholder: true.
+- question: "Я начинаю в марте. Успею?"
+  answer: "Ответ заполнит S10.run."
+  placeholder: true
+- question: "Нужны ли часы и какие поддерживаются?"
+  answer: "Ответ заполнит S10.run."
+  placeholder: true
+- question: "Что будет, если я заболею или пропущу неделю?"
+  answer: "Ответ заполнит S10.run."
+  placeholder: true
+- question: "Подходит ли план на 4:30 и медленнее?"
+  answer: "Ответ заполнит S10.run."
+  placeholder: true
+- question: "Как задать вопрос Юрию?"
+  answer: "Ответ заполнит S10.run."
+  placeholder: true
+- question: "Можно ли вернуть деньги?"
+  answer: "Ответ заполнит S10.run."
+  placeholder: true

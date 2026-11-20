@@ -1,0 +1,21 @@
+{
+  "name": "kazan-marathon-landing",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "astro dev",
+    "validate": "node scripts/validate.mjs",
+    "prebuild": "node scripts/validate.mjs",
+    "build": "astro build",
+    "preview": "astro preview",
+    "report": "node scripts/report.mjs",
+    "images": "node scripts/images.mjs",
+    "test:validation": "node scripts/test-validation.mjs"
+  },
+  "dependencies": {
+    "astro": "^5.18.2",
+    "js-yaml": "^5.5.0",
+    "sharp": "^0.35.5"
+  }
+}

@@ -1,0 +1,64 @@
+---
+// Лендинг собирается из content/*.yaml. Ошибка в контенте останавливает сборку (lib/content.mjs).
+import { loadContent } from '../../lib/content.mjs';
+import { withUtm, mskDay, dayNum } from '../lib/format.mjs';
+import Head from '../components/Head.astro';
+import Nav from '../components/Nav.astro';
+import Hero from '../components/Hero.astro';
+import Includes from '../components/Includes.astro';
+import Curator from '../components/Curator.astro';
+import Cases from '../components/Cases.astro';
+import HowItWorks from '../components/HowItWorks.astro';
+import Plan from '../components/Plan.astro';
+import Pricing from '../components/Pricing.astro';
+import Faq from '../components/Faq.astro';
+import Footer from '../components/Footer.astro';
+import ClientLogic from '../components/ClientLogic.astro';
+
+const data = loadContent();
+const { config, weeks } = data;
+
+// Состояние на момент сборки: страница читается и без скрипта. На клиенте всё пересчитывается по МСК.
+const today = mskDay(Date.now());
+const race = dayNum(config.race_date);
+const week1 = dayNum(weeks[0].start);
+const finished = today > race;
+const currentWeek = today < week1 ? 1 : finished ? weeks.length : Math.floor((today - week1) / 7) + 1;
+const ladder = config.price_ladder;
+let stepIdx = 0;
+ladder.forEach((s, i) => { if (dayNum(s.from) <= today) stepIdx = i; });
+
+const buyUrl = withUtm(config.s10_buy_url, config.utm_default);
+const ctx = { config, weeks, today, race, week1, finished, currentWeek, stepIdx, buyUrl,
+  offerUrl: withUtm(config.s10_offer_url, config.utm_default),
+  privacyUrl: withUtm(config.s10_privacy_url, config.utm_default) };
+---
+<!doctype html>
+<html lang="ru" data-type="service" data-radius="soft" data-buttons="block" data-motion>
+<Head config={config} />
+<body>
+<!-- type: service (авторский план подготовки и сопровождение на S10.run)
+     deal: hero photo (data-calm top), palette clay-pine, type onest, nav plain (nav-mega без панели: разделы — один лендинг),
+     close close-type, footer footer-dark, rhythm space, buttons block, mark ring
+     moments: word-highlight в разделе «Куратор» -->
+<Nav buyUrl={buyUrl} />
+<main id="top">
+  <Hero {...ctx} />
+  <Includes />
+  <Curator config={config} />
+  <Cases cases={data.cases} config={config} />
+  <HowItWorks />
+  <Plan {...ctx} />
+  <Pricing {...ctx} />
+  <Faq faq={data.faq} />
+</main>
+<Footer {...ctx} />
+<nav class="actionbar" aria-label="Быстрое действие">
+  <a class="btn btn--primary" href={buyUrl} data-s10 data-goal="buy_click" data-block="actionbar">Начать подготовку</a>
+</nav>
+<ClientLogic {...ctx} dev={import.meta.env.DEV} />
+<script type="module" src="/assets/system.js" is:inline></script>
+<script type="module" src="/assets/motion/motion.js" is:inline></script>
+<script type="module" src="/assets/layout/layout.js" is:inline></script>
+</body>
+</html>
